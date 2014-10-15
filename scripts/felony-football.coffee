@@ -39,11 +39,8 @@ getTeamCounts = (index, item) ->
     # console.log('added 1 to team count for ', teamAtr)
     teams[year][teamAtr] = teamCount
 
-module.exports = (robot) ->
-
-  robot.hear /ff/i, (msg) ->
-
-    robot.http('http://www.usatoday.com/sports/nfl/arrests/')
+retrieveTeamScores = (robot, callback) ->
+  robot.http('http://www.usatoday.com/sports/nfl/arrests/')
     .get() (err, res, body) ->
       $ = cheerio.load(body)
       # console.log('jquery : ' , $)
@@ -51,4 +48,22 @@ module.exports = (robot) ->
       # $('tbody tr').remove()
       # $('tbody tr td:nth-child(2)').each(getTeamCounts)
       $('tbody tr').each(getTeamCounts)
-      msg.send JSON.stringify(teams)
+      # msg.send JSON.stringify(teams)
+      callback(teams)
+
+module.exports = (robot) ->
+
+  robot.hear /felony football/i, (msg) ->
+    teams = {}
+    sendMessage = (data) ->
+      msg.send JSON.stringify(data)
+    retrieveTeamScores(robot, sendMessage)
+
+  robot.hear /nffl (\d\d\d\d)/i, (msg) ->
+    teams = {}
+    sendMessage = (data) ->
+      yearScores = data[msg.match[1]]
+      console.log('scores: ', yearScores)
+
+      msg.send
+    retrieveTeamScores(robot, sendMessage)
