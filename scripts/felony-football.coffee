@@ -51,6 +51,18 @@ retrieveTeamScores = (robot, callback) ->
       # msg.send JSON.stringify(teams)
       callback(teams)
 
+format = (data) ->
+  rank = []
+  deets = []
+  for key of data
+    rank.push { team: key, num: data[key]}
+  rank.sort(orderByDesc)
+  deets.push "#{t.team} - #{t.num}" for t in rank
+  deets.join '\n'
+
+orderByDesc = (a,b) ->
+  b.num - a.num
+
 module.exports = (robot) ->
 
   robot.hear /felony football/i, (msg) ->
@@ -59,11 +71,13 @@ module.exports = (robot) ->
       msg.send JSON.stringify(data)
     retrieveTeamScores(robot, sendMessage)
 
-  robot.hear /nffl (\d\d\d\d)/i, (msg) ->
+  robot.respond /nffl (\d{4})/i, (msg) ->
     teams = {}
+    year = msg.match[1] or null
+    
     sendMessage = (data) ->
-      yearScores = data[msg.match[1]]
-      console.log('scores: ', yearScores)
+      yearScores = data[year]
+      output = format yearScores
+      msg.send output
 
-      msg.send
     retrieveTeamScores(robot, sendMessage)
