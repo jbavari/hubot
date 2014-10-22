@@ -55,7 +55,7 @@ format = (data, team) ->
   rank = []
   deets = []
   for key of data
-    rank.push { team: key, num: data[key]} if not team? or key.localeCompare(team) == 0
+    rank.push { team: key, num: data[key] } if not team? or key.localeCompare(team) == 0
   rank.sort(orderByDesc)
   deets.push " * #{t.team} - #{t.num}" for t in rank
   deets.push " * No arrests for #{team}, yet." if team? and deets.length == 0
@@ -63,6 +63,22 @@ format = (data, team) ->
 
 orderByDesc = (a,b) ->
   b.num - a.num
+
+formatTeamByYear = (data, team) ->
+  rank = []
+  deets = []
+  for year of data
+    yrData = data[year]
+    for key of yrData
+      rank.push { year: year, num: yrData[key] } if key.localeCompare(team) == 0
+  
+  rank.sort(orderByYearDesc)
+  deets.push " * #{t.year} - #{t.num}" for t in rank
+  deets.push " * No arrests for #{team}, yet." if team? and deets.length == 0
+  deets.join '\n'
+
+orderByYearDesc = (a,b) ->
+  b.year - a.year
 
 module.exports = (robot) ->
 
@@ -83,6 +99,18 @@ module.exports = (robot) ->
       output += " #{team}" if team?
       yearScores = data[year]
       output += '\n' + format yearScores, team
+      msg.send output
+
+    retrieveTeamScores(robot, sendMessage)
+
+  robot.respond /nffl team(\s)?(.*)?/i, (msg) ->
+    teams = {}
+    team = msg.match[2] or null
+
+    sendMessage = (data) ->
+      team = team.toUpperCase() if team?
+      output = "NFFL - #{team}"
+      output += '\n' + formatTeamByYear data, team
       msg.send output
 
     retrieveTeamScores(robot, sendMessage)
