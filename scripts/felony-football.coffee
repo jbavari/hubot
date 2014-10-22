@@ -51,13 +51,14 @@ retrieveTeamScores = (robot, callback) ->
       # msg.send JSON.stringify(teams)
       callback(teams)
 
-format = (data) ->
+format = (data, team) ->
   rank = []
   deets = []
   for key of data
-    rank.push { team: key, num: data[key]}
+    rank.push { team: key, num: data[key]} if not team? or key.localeCompare(team) == 0
   rank.sort(orderByDesc)
-  deets.push "#{t.team} - #{t.num}" for t in rank
+  deets.push " * #{t.team} - #{t.num}" for t in rank
+  deets.push " * No arrests for #{team}, yet." if team? and deets.length == 0
   deets.join '\n'
 
 orderByDesc = (a,b) ->
@@ -71,13 +72,17 @@ module.exports = (robot) ->
       msg.send JSON.stringify(data)
     retrieveTeamScores(robot, sendMessage)
 
-  robot.respond /nffl (\d{4})/i, (msg) ->
+  robot.respond /nffl (\d{4})(\s)?(.*)?/i, (msg) ->
     teams = {}
     year = msg.match[1] or null
-    
+    team = msg.match[3] or null
+
     sendMessage = (data) ->
+      output = "NFFL - #{year}"
+      team = team.toUpperCase() if team?
+      output += " #{team}" if team?
       yearScores = data[year]
-      output = format yearScores
+      output += '\n' + format yearScores, team
       msg.send output
 
     retrieveTeamScores(robot, sendMessage)
