@@ -51,6 +51,25 @@ retrieveTeamScores = (robot, callback) ->
       # msg.send JSON.stringify(teams)
       callback(teams)
 
+getTeamDetails = (index, item) ->
+  team = $(item).find('td:nth-child(2)').html()
+  
+  if typeof teams[team] == 'undefined'
+    teams[team] = []
+
+  date = $(item).find('td:nth-child(1)').html()
+  name = $(item).find('td:nth-child(3)').html()
+  teams[team].push("#{date} - #{name}")
+
+retrieveTeamDetails = (robot, callback) ->
+  robot.http('http://www.usatoday.com/sports/nfl/arrests/')
+    .get() (err, res, body) ->
+      throw err if err
+      $ = cheerio.load(body)
+
+      $('tbody tr').each(getTeamDetails)
+      callback(teams)
+
 format = (data, team) ->
   rank = []
   deets = []
@@ -79,6 +98,12 @@ formatTeamByYear = (data, team) ->
 
 orderByYearDesc = (a,b) ->
   b.year - a.year
+
+formatTeamDetails = (data, team) ->
+  deets = []
+  deets.push " * #{t}" for t in data[team]
+  deets.push " * No arrests for #{team}, yet." if team? and deets.length == 0
+  deets.join '\n'
 
 module.exports = (robot) ->
 
@@ -114,3 +139,15 @@ module.exports = (robot) ->
       msg.send output
 
     retrieveTeamScores(robot, sendMessage)
+
+  robot.respond /nffl details(\s)?(.*)?/i, (msg) ->
+    teams = {}
+    team = msg.match[2] or null
+
+    sendMessage = (data) ->
+      team = team.toUpperCase() if team?
+      output = "NFFL - Details for #{team}"
+      output += '\n' + formatTeamDetails data, team
+      msg.send output
+
+    retrieveTeamDetails(robot, sendMessage)
