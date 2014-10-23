@@ -2,7 +2,7 @@
 #   Make hubot fetch the national felony football scores
 #
 # Dependencies:
-#   "scraper": "0.0.9"
+#   "cheerio": "^0.17.0"
 #
 # Configuration:
 #   None
