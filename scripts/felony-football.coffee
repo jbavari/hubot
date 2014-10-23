@@ -25,6 +25,7 @@ url = 'http://www.usatoday.com/sports/nfl/arrests/'
 $ = null
 teams = {}
 help = [
+  'felony football - return arrest scorecard'
   'hubot nffl - return arrest scorecard'
   'hubot nffl <year> - show nfl arrests for the given year'
   'hubot nffl <year> <team> - show nfl arrests for the given year, by team'
