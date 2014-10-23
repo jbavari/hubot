@@ -39,8 +39,8 @@ getTeamCounts = (index, item) ->
     # console.log('added 1 to team count for ', teamAtr)
     teams[year][teamAtr] = teamCount
 
-retrieveTeamScores = (robot, callback) ->
-  robot.http('http://www.usatoday.com/sports/nfl/arrests/')
+retrieveTeamScores = (msg, callback) ->
+  msg.http('http://www.usatoday.com/sports/nfl/arrests/')
     .get() (err, res, body) ->
       $ = cheerio.load(body)
       # console.log('jquery : ' , $)
@@ -105,11 +105,23 @@ formatTeamDetails = (data, team) ->
   deets.push " * No arrests for #{team}, yet." if team? and deets.length == 0
   deets.join '\n'
 
+formatAll = (data) ->
+  deets = []
+  yearDeets = []
+  for year of data
+    yearDeets.push { year: year, data: data[year] }
+
+  yearDeets.sort(orderByYearDesc)
+  deets.push "#{deet.year}\n" + format(deet.data) for deet in yearDeets
+  deets.join '\n\n'
+
 showAll = (msg) ->
-    teams = {}
-    sendMessage = (data) ->
-      msg.send JSON.stringify(data)
-    retrieveTeamScores(msg, sendMessage)
+  teams = {}
+  sendMessage = (data) ->
+    output = "NFFL - All Years\n"
+    output += formatAll data
+    msg.send output
+  retrieveTeamScores(msg, sendMessage)
 
 module.exports = (robot) ->
 
