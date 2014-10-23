@@ -105,18 +105,29 @@ formatTeamDetails = (data, team) ->
   deets.push " * No arrests for #{team}, yet." if team? and deets.length == 0
   deets.join '\n'
 
-module.exports = (robot) ->
-
-  robot.hear /felony football/i, (msg) ->
+showAll = (msg) ->
     teams = {}
     sendMessage = (data) ->
       msg.send JSON.stringify(data)
-    retrieveTeamScores(robot, sendMessage)
+    retrieveTeamScores(msg, sendMessage)
 
-  robot.respond /nffl (\d{4})(\s)?(.*)?/i, (msg) ->
+module.exports = (robot) ->
+
+  robot.hear /felony football/i, (msg) ->
+    showAll msg
+
+  robot.respond /nffl(\s)?(\d{4})?(\s)?(.*)?/i, (msg) ->
     teams = {}
-    year = msg.match[1] or null
-    team = msg.match[3] or null
+    year = msg.match[2] or null
+    team = msg.match[4] or null
+
+    if not year? and team?
+      msg.send 'Unknown command.'
+      return
+
+    if not year?
+      showAll msg
+      return
 
     sendMessage = (data) ->
       output = "NFFL - #{year}"
@@ -126,11 +137,16 @@ module.exports = (robot) ->
       output += '\n' + format yearScores, team
       msg.send output
 
-    retrieveTeamScores(robot, sendMessage)
+    if not year?
+      retrieveTeamScores(robot, sendMessage)
 
-  robot.respond /nffl team(\s)?(.*)?/i, (msg) ->
+  robot.respond /nffl team(\s)?(.*){1,}/i, (msg) ->
     teams = {}
     team = msg.match[2] or null
+
+    if not team?
+      msg.send 'Did you mean "hubot nffl team <team>"?'
+      return
 
     sendMessage = (data) ->
       team = team.toUpperCase() if team?
@@ -140,9 +156,12 @@ module.exports = (robot) ->
 
     retrieveTeamScores(robot, sendMessage)
 
-  robot.respond /nffl details(\s)?(.*)?/i, (msg) ->
+  robot.respond /nffl details(\s)?(.*){1,}/i, (msg) ->
     teams = {}
     team = msg.match[2] or null
+    if not team?
+      msg.send 'Did you mean "hubot nffl details <team>"?'
+      return
 
     sendMessage = (data) ->
       team = team.toUpperCase() if team?
