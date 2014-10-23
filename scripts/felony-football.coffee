@@ -8,13 +8,31 @@
 #   None
 #
 # Commands:
-#   felony football scoreboard
+#   felony football - return arrest scorecard
+#   hubot nffl - return arrest scorecard
+#   hubot nffl <year> - show nfl arrests for the given year
+#   hubot nffl <year> <team> - show nfl arrests for the given year, by team
+#   hubot nffl team <team> - show nfl arrests for the team
+#   hubot nffl details <team> - show nfl arrests for the team with player details
+#   hubot nffl help - show list of hubot nffl commands
+#   hubot nffl info - show some simple info about this script
+#
 # Author:
-#   jbavari
+#   jbavari, ryoe
 
 cheerio = require 'cheerio'
+url = 'http://www.usatoday.com/sports/nfl/arrests/'
 $ = null
 teams = {}
+help = [
+  'hubot nffl - return arrest scorecard'
+  'hubot nffl <year> - show nfl arrests for the given year'
+  'hubot nffl <year> <team> - show nfl arrests for the given year, by team'
+  'hubot nffl team <team> - show nfl arrests for the team'
+  'hubot nffl details <team> - show nfl arrests for the team with player details'
+  'hubot nffl help - show list of hubot nffl commands'
+  'hubot nffl info - show some simple info about this script'
+]
 
 # teams = { '2014': { 'DAL': 1 }, '2013': { 'DAL': 3 } }
 
@@ -40,7 +58,7 @@ getTeamCounts = (index, item) ->
     teams[year][teamAtr] = teamCount
 
 retrieveTeamScores = (msg, callback) ->
-  msg.http('http://www.usatoday.com/sports/nfl/arrests/')
+  msg.http(url)
     .get() (err, res, body) ->
       $ = cheerio.load(body)
       # console.log('jquery : ' , $)
@@ -62,7 +80,7 @@ getTeamDetails = (index, item) ->
   teams[team].push("#{date} - #{name}")
 
 retrieveTeamDetails = (robot, callback) ->
-  robot.http('http://www.usatoday.com/sports/nfl/arrests/')
+  robot.http(url)
     .get() (err, res, body) ->
       throw err if err
       $ = cheerio.load(body)
@@ -128,13 +146,29 @@ module.exports = (robot) ->
   robot.hear /felony football/i, (msg) ->
     showAll msg
 
+  robot.respond /nffl help/i, (msg) ->
+    msg.send help.join '\n'
+
+  robot.respond /nffl info/i, (msg) ->
+    deets = [
+      "felony-football.coffee brought to you by jbavari"
+      "NFL Arrest data from #{url}"
+    ]
+    msg.send deets.join '\n'
+
   robot.respond /nffl(\s)?(\d{4})?(\s)?(.*)?/i, (msg) ->
     teams = {}
     year = msg.match[2] or null
     team = msg.match[4] or null
 
+    if team? and team.toLowerCase().localeCompare('help') == 0
+      return
+
+    if team? and team.toLowerCase().localeCompare('info') == 0
+      return
+
     if not year? and team?
-      msg.send 'Unknown command.'
+      msg.send 'Unknown command. Try "hubot nffl help".'
       return
 
     if not year?
