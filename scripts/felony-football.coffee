@@ -35,6 +35,7 @@ help = [
   'hubot nffl info - show some simple info about this script'
 ]
 
+#hat tip to David Pearson https://github.com/NFLScoreBot/nfl-teams
 nflTeams =
   "Arizona Cardinals"    : { alt: ["cardinals", "cards", "zona", "az"], abbr: "ARI" }
   "Atlanta Falcons"      : { alt: ["falcons", "atlanta"], abbr: "ATL" }
