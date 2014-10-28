@@ -45,7 +45,7 @@ nflTeams =
   "Chicago Bears"        : { alt: ["bears", "da bears", "chicago"], abbr: "CHI" }
   "Cincinnati Bengals"   : { alt: ["bengals", "cincinnati", "cincy"], abbr: "CIN" }
   "Cleveland Browns"     : { alt: ["browns", "cleveland"], abbr: "CLE" }
-  "Dallas Cowboys"       : { alt: ["cowboys", "boys", "americas team", "dallas"], abbr: "DAL" }
+  "Dallas Cowboys"       : { alt: ["cowboys", "boys", "americas team", "america's team", "dallas"], abbr: "DAL" }
   "Denver Broncos"       : { alt: ["broncos", "broncs", "bronchos", "denver"], abbr: "DEN" }
   "Detroit Lions"        : { alt: ["lions", "detroit"], abbr: "DET" }
   "Green Bay Packers"    : { alt: ["packers", "pack", "green and gold", "cheese heads", "cheeseheads", "green bay"], abbr: "GB" }
@@ -83,6 +83,9 @@ findTeamName = (name) ->
     if team.abbr.localeCompare(name.toUpperCase()) == 0
       return t
     for nick in team.alt
+      console.log nick
+      console.log name
+      console.log nick.localeCompare(name.toLowerCase())
       if nick.localeCompare(name.toLowerCase()) == 0
         return t
   return null
@@ -217,8 +220,8 @@ module.exports = (robot) ->
     ]
     msg.send deets.join '\n'
 
-  robot.respond /nffl(\s)?(\d{4})?(\s)?(.*)?/i, (msg) ->
-    reIgnore = /help|info|team|details/gi
+  robot.respond /nffl(\s)?(\d{4})?(\s)?(.*){0,}/i, (msg) ->
+    reIgnore = /help|info|^team&|details/gi
     teams = {}
     year = msg.match[2] or null
     team = msg.match[4] or null
