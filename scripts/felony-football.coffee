@@ -83,9 +83,6 @@ findTeamName = (name) ->
     if team.abbr.localeCompare(name.toUpperCase()) == 0
       return t
     for nick in team.alt
-      console.log nick
-      console.log name
-      console.log nick.localeCompare(name.toLowerCase())
       if nick.localeCompare(name.toLowerCase()) == 0
         return t
   return null
