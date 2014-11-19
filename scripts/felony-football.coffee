@@ -204,7 +204,7 @@ showAll = (msg) ->
 
 module.exports = (robot) ->
 
-  robot.hear /felony football/i, (msg) ->
+  robot.respond /felony football/i, (msg) ->
     showAll msg
 
   robot.respond /nffl help/i, (msg) ->
